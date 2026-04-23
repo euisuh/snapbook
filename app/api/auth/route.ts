@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}))
   const { password } = body as { password?: string }
 
-  if (!password || !(await verifyPassword(password))) {
+  if (!password || typeof password !== 'string' || !(await verifyPassword(password))) {
     return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
   }
 
@@ -25,6 +25,6 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(_request: NextRequest) {
   const response = NextResponse.json({ ok: true })
-  response.headers.set('Set-Cookie', `auth=; Path=/; HttpOnly; Max-Age=0`)
+  response.headers.set('Set-Cookie', `auth=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`)
   return response
 }
