@@ -46,4 +46,12 @@ describe('ffmpeg', () => {
     const { generateVideoThumbnail } = await import('../ffmpeg')
     await expect(generateVideoThumbnail('/data/media/vid.mp4', '/data/thumbs/vid.jpg')).resolves.toBeUndefined()
   })
+
+  it('extractSceneFrames rejects on exit code > 1', async () => {
+    const { spawn } = await import('child_process')
+    vi.mocked(spawn).mockImplementation(() => makeProc(2) as any)
+
+    const { extractSceneFrames } = await import('../ffmpeg')
+    await expect(extractSceneFrames('/data/media/vid.mp4', 'vid123')).rejects.toThrow('scene detect failed')
+  })
 })

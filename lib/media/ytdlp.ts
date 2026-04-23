@@ -39,7 +39,12 @@ export async function downloadVideo(url: string, id: string): Promise<DownloadRe
         reject(new Error(`yt-dlp exited ${code}: ${stderr.slice(0, 300)}`))
         return
       }
-      resolve({ mediaPath: filepath.trim() })
+      const mediaPath = filepath.trim()
+      if (!mediaPath) {
+        reject(new Error('yt-dlp exited 0 but reported no output path'))
+        return
+      }
+      resolve({ mediaPath })
     })
     proc.on('error', (err) => {
       reject(new Error(`yt-dlp not found or failed to start: ${err.message}`))
