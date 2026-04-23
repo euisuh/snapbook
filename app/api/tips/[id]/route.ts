@@ -49,6 +49,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const rows = await db.select({ id: tips.id }).from(tips).where(eq(tips.id, id))
+  if (!rows.length) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   await db.delete(tips).where(eq(tips.id, id))
   return NextResponse.json({ ok: true })
 }

@@ -4,7 +4,6 @@ import { ingestedVideos } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { readdir } from 'fs/promises'
 import path from 'path'
-import fs from 'fs'
 
 export async function GET(
   _request: NextRequest,
@@ -17,13 +16,11 @@ export async function GET(
   const video = rows[0]
   let frames: Array<{ path: string; url: string }> = []
   const framesDir = path.join('/data/frames', id)
-  if (video.status === 'ready' && fs.existsSync(framesDir)) {
-    const files = await readdir(framesDir).catch(() => [])
-    frames = files
-      .filter((f) => f.endsWith('.jpg'))
-      .sort()
-      .map((f) => ({ path: path.join(framesDir, f), url: `/api/media/frames/${id}/${f}` }))
-  }
+  const files = await readdir(framesDir).catch(() => [])
+  frames = files
+    .filter((f) => f.endsWith('.jpg'))
+    .sort()
+    .map((f) => ({ path: path.join(framesDir, f), url: `/api/media/frames/${id}/${f}` }))
 
   return NextResponse.json({
     ...video,
