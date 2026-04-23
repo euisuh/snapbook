@@ -1,0 +1,20 @@
+version: '3.9'
+
+services:
+  snapbook:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - snapbook_data:/data
+    environment:
+      DATABASE_URL: /data/db.sqlite
+      MEDIA_DIR: /data/media
+      THUMBS_DIR: /data/thumbs
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-changeme}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production-32chars}
+      NODE_ENV: production
+    restart: unless-stopped
+
+volumes:
+  snapbook_data:
