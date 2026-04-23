@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { NextRequest } from 'next/server'
 
@@ -21,7 +22,11 @@ describe('POST /api/auth', () => {
     })
     const res = await POST(req)
     expect(res.status).toBe(200)
-    expect(res.headers.get('Set-Cookie')).toContain('auth=')
+    const cookie = res.headers.get('Set-Cookie')!
+    expect(cookie).toContain('auth=')
+    expect(cookie).toContain('HttpOnly')
+    expect(cookie).toContain('SameSite=Strict')
+    expect(cookie).toContain('Max-Age=86400')
   })
 
   it('returns 401 on wrong password', async () => {
