@@ -64,7 +64,7 @@ export async function extractFrameAt(
       if (code !== 0) reject(new Error('Frame extraction failed'))
       else resolve()
     })
-    proc.on('error', (e) => reject(e))
+    proc.on('error', (e) => reject(new Error(`ffmpeg not found: ${e.message}`)))
   })
 
   return framePath
