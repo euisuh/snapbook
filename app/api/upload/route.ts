@@ -30,8 +30,10 @@ export async function POST(request: NextRequest) {
     thumbPath = await generateThumbnail(mediaPath, id).catch(() => null)
   }
 
+  const mediaType = file.type.startsWith('video/') ? 'video_frame' : 'screenshot'
+
   return NextResponse.json({
-    id, mediaPath, thumbPath, mediaType: 'screenshot' as const,
+    id, mediaPath, thumbPath, mediaType,
     mediaUrl: `/api/media/media/${id}.${ext}`,
     thumbUrl: thumbPath ? `/api/media/thumbs/${id}.jpg` : null,
   }, { status: 201 })

@@ -19,7 +19,7 @@ export async function POST(
   }
 
   const rows = await db.select().from(ingestedVideos).where(eq(ingestedVideos.id, id))
-  if (!rows.length || !rows[0].mediaPath) {
+  if (!rows.length || rows[0].status !== 'ready' || !rows[0].mediaPath) {
     return NextResponse.json({ error: 'Video not found or not ready' }, { status: 404 })
   }
 
@@ -29,7 +29,7 @@ export async function POST(
   return NextResponse.json({
     frameId,
     path: framePath,
-    url: `/api/media/frames/${id}/manual_${frameId}.jpg`,
+    url: `/api/media/frames/${id}/${path.basename(framePath)}`,
     timeMs,
   })
 }
