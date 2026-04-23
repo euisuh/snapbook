@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -81,7 +82,9 @@ export default function FrameCard({ frame, videoId, onSaved }: FrameCardProps) {
       }
       handleCancel()
       onSaved()
+      toast.success('Saved as tip!')
     } catch (err) {
+      toast.error('Failed to save tip')
       setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setLoading(false)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import FrameCard from '@/components/admin/FrameCard'
 
 interface FrameReviewProps {
@@ -8,6 +8,7 @@ interface FrameReviewProps {
   initialStatus: string
   initialFrames: Array<{ url: string; path: string }>
   sourceUrl: string
+  videoUrl: string | null
 }
 
 interface IngestResponse {
@@ -25,11 +26,35 @@ export default function FrameReview({
   initialStatus,
   initialFrames,
   sourceUrl: _sourceUrl,
+  videoUrl,
 }: FrameReviewProps) {
   const [status, setStatus] = useState(initialStatus)
   const [frames, setFrames] = useState(initialFrames)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [savedCount, setSavedCount] = useState(0)
+  const [capturing, setCapturing] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  async function handleCapture() {
+    if (!videoRef.current) return
+    const timeMs = Math.round(videoRef.current.currentTime * 1000)
+    setCapturing(true)
+    try {
+      const res = await fetch(`/api/ingest/${videoId}/capture`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timeMs }),
+      })
+      if (!res.ok) throw new Error('Capture failed')
+      const frame = await res.json()
+      // Add new frame to list
+      setFrames((prev) => [{ url: frame.url, path: frame.path }, ...prev])
+    } catch {
+      // silent fail — user can retry
+    } finally {
+      setCapturing(false)
+    }
+  }
 
   useEffect(() => {
     if (status !== 'pending' && status !== 'processing') return
@@ -85,6 +110,26 @@ export default function FrameReview({
 
     return (
       <div className="flex flex-col gap-4">
+        {videoUrl !== null && (
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            controls
+            className="w-full max-w-2xl rounded-lg bg-black"
+          />
+        )}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCapture}
+            disabled={capturing}
+            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm text-white hover:bg-zinc-700 disabled:opacity-50"
+          >
+            {capturing ? 'Capturing...' : 'Capture current frame'}
+          </button>
+          <span className="text-xs text-zinc-500">
+            Click to capture the frame at the current video position
+          </span>
+        </div>
         {savedCount > 0 && (
           <p className="text-sm text-muted-foreground">
             {savedCount} frame{savedCount !== 1 ? 's' : ''} saved as tip{savedCount !== 1 ? 's' : ''}.

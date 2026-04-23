@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import AddTipForm from '@/components/admin/AddTipForm'
 import type { TipWithCategories } from '@/types/tip'
@@ -38,8 +39,9 @@ export default function AdminPageClient() {
       const res = await fetch(`/api/tips/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Delete failed')
       setTips((prev) => prev.filter((t) => t.id !== id))
+      toast.success('Tip deleted')
     } catch {
-      // silently restore — user can retry
+      toast.error('Failed to delete tip')
     } finally {
       setDeletingIds((prev) => {
         const next = new Set(prev)
@@ -55,12 +57,20 @@ export default function AdminPageClient() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Admin</h1>
-          <Link
-            href="/"
-            className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-          >
-            ← Gallery
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin/ingest"
+              className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+            >
+              Ingest History
+            </Link>
+            <Link
+              href="/"
+              className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              ← Gallery
+            </Link>
+          </div>
         </div>
 
         {/* Add tip form */}

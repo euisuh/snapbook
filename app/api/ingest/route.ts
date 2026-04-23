@@ -2,10 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { ingestedVideos } from '@/lib/db/schema'
 import { createId } from '@paralleldrive/cuid2'
-import { eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { downloadVideo } from '@/lib/media/ytdlp'
 import { extractSceneFrames, generateVideoThumbnail } from '@/lib/media/ffmpeg'
 import path from 'path'
+
+export async function GET() {
+  const rows = await db
+    .select()
+    .from(ingestedVideos)
+    .orderBy(desc(ingestedVideos.createdAt))
+  return NextResponse.json(rows)
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}))

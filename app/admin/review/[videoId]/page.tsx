@@ -36,6 +36,7 @@ export default async function ReviewPage({
         initialStatus={data.status}
         initialFrames={data.frames}
         sourceUrl={data.sourceUrl}
+        videoUrl={data.videoUrl}
       />
     </div>
   )
