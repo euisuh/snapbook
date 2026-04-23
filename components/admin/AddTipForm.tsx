@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,13 +31,11 @@ export default function AddTipForm({ onSuccess }: AddTipFormProps) {
   const [newCategoryName, setNewCategoryName] = useState('')
   const [isAddingCategory, setIsAddingCategory] = useState(false)
   const [uploadLoading, setUploadLoading] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Video URL tab state
   const [videoUrl, setVideoUrl] = useState('')
   const [ingestLoading, setIngestLoading] = useState(false)
-  const [ingestError, setIngestError] = useState<string | null>(null)
   const [ingestQueued, setIngestQueued] = useState(false)
 
   useEffect(() => {
@@ -78,7 +77,6 @@ export default function AddTipForm({ onSuccess }: AddTipFormProps) {
     e.preventDefault()
     if (!file || !title.trim()) return
     setUploadLoading(true)
-    setUploadError(null)
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -121,8 +119,9 @@ export default function AddTipForm({ onSuccess }: AddTipFormProps) {
       setSelectedCategoryIds([])
       if (fileInputRef.current) fileInputRef.current.value = ''
       onSuccess()
+      toast.success('Tip saved!')
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Something went wrong')
+      toast.error(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setUploadLoading(false)
     }
@@ -132,7 +131,6 @@ export default function AddTipForm({ onSuccess }: AddTipFormProps) {
     e.preventDefault()
     if (!videoUrl.trim()) return
     setIngestLoading(true)
-    setIngestError(null)
     try {
       const res = await fetch('/api/ingest', {
         method: 'POST',
@@ -145,11 +143,12 @@ export default function AddTipForm({ onSuccess }: AddTipFormProps) {
       }
       const result = await res.json() as { id: string }
       setIngestQueued(true)
+      toast.success('Video queued for processing')
       setTimeout(() => {
         router.push(`/admin/review/${result.id}`)
       }, 800)
     } catch (err) {
-      setIngestError(err instanceof Error ? err.message : 'Something went wrong')
+      toast.error(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setIngestLoading(false)
     }
@@ -241,10 +240,6 @@ export default function AddTipForm({ onSuccess }: AddTipFormProps) {
             </div>
           </div>
 
-          {uploadError && (
-            <p className="text-sm text-destructive">{uploadError}</p>
-          )}
-
           <Button type="submit" disabled={uploadLoading || !file || !title.trim()}>
             {uploadLoading ? 'Uploading...' : 'Add Tip'}
           </Button>
@@ -267,16 +262,6 @@ export default function AddTipForm({ onSuccess }: AddTipFormProps) {
               Supports YouTube and other yt-dlp compatible URLs.
             </p>
           </div>
-
-          {ingestError && (
-            <p className="text-sm text-destructive">{ingestError}</p>
-          )}
-
-          {ingestQueued && (
-            <p className="text-sm text-muted-foreground">
-              Queued for processing... Redirecting to frame review.
-            </p>
-          )}
 
           <Button
             type="submit"
