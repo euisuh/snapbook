@@ -1,11 +1,35 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { Badge } from '@/components/ui/badge'
 import type { TipWithCategories } from '@/types/tip'
 import path from 'path'
 
 const BASE = process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const res = await fetch(`${BASE}/api/tips/${id}`, { cache: 'no-store' })
+  if (!res.ok) return { title: 'Tip not found' }
+  const tip = await res.json()
+  const imageUrl = tip.thumbPath
+    ? `${BASE}/api/media/thumbs/${id}.jpg`
+    : `${BASE}/api/media/media/${path.basename(tip.mediaPath)}`
+  return {
+    title: `${tip.title} — Snapbook`,
+    description: tip.notes ?? undefined,
+    openGraph: {
+      title: tip.title,
+      description: tip.notes ?? undefined,
+      images: [{ url: imageUrl }],
+    },
+  }
+}
 
 export default async function TipPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
