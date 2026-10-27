@@ -3,15 +3,17 @@ import fs from 'fs'
 import path from 'path'
 import mime from 'mime-types'
 
+const DATA_DIR = process.env.DATA_DIR ?? '/data'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path: segments } = await params
-  const filePath = path.join('/data', ...segments)
+  const filePath = path.join(DATA_DIR, ...segments)
 
   // Prevent path traversal
-  if (!filePath.startsWith('/data/')) {
+  if (!filePath.startsWith(DATA_DIR + '/')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

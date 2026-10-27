@@ -18,7 +18,7 @@ export async function generateMetadata({
   if (!res.ok) return { title: 'Tip not found' }
   const tip = await res.json()
   const imageUrl = tip.thumbPath
-    ? `${BASE}/api/media/thumbs/${id}.jpg`
+    ? `${BASE}/api/media/thumbs/${path.basename(tip.thumbPath)}`
     : `${BASE}/api/media/media/${path.basename(tip.mediaPath)}`
   return {
     title: `${tip.title} — Snapbook`,
