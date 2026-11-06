@@ -14,7 +14,7 @@ interface TipCardProps {
 export default function TipCard({ tip }: TipCardProps) {
   const [imgError, setImgError] = useState(false)
   const thumbSrc = tip.thumbPath
-    ? `/api/media/thumbs/${tip.id}.jpg`
+    ? `/api/media/thumbs/${tip.thumbPath.split('/').pop()}`
     : `/api/media/media/${tip.mediaPath.split('/').pop()}`
 
   return (

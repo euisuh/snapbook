@@ -52,6 +52,7 @@ function initDb() {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
 
   const sqlite = new Database(DB_PATH)
+  sqlite.pragma('busy_timeout = 5000') // parallel `next build` workers open the DB at once
   sqlite.pragma('journal_mode = WAL')
   sqlite.pragma('foreign_keys = ON')
   createTables(sqlite)
